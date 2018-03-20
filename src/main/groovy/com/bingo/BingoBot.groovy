@@ -52,7 +52,7 @@ class BingoBot {
                 currentMsgFeedTS.compareAndSet(currentMsgFeedTS.get(), msgFeedResponse[MsgFeedResponseFields.TS])
                 longPollServerMap[LongPollServerMapFields.TS] = msgFeedResponse[MsgFeedResponseFields.TS]
 
-                vkHelperService.processMsgFeed(2000000000 + allowVkChatId, botVkUserId, botAdminVkUserId, msgFeedResponse, vk, actor)
+                vkHelperService.filterMsgFeed(Arrays.asList(2000000000 + allowVkChatId), botVkUserId, botAdminVkUserId, msgFeedResponse, vk, actor)
             }
         } catch (Exception ex) {
             String date = DateUtils.getDateString("dd-MM-yyyy_HH_mm_ss")

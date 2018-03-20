@@ -74,12 +74,13 @@ final class VkHelperService {
     // example
     // [4,2105994,561,123456,1496404246,"hello",{"attach1_type":"photo","attach1":"123456_417336473","attach2_type":"audio","attach2":"123456_456239018","title":" ... "}]
     @CompileStatic
-    final public void processMsgFeed(
-            final int allowPeerId,
+    final public void filterMsgFeed(
+            final List<Integer> allowPeerIds,
             final int botUserId,
             final int botAdminUserId,
             final Map msgFeedResponse, final VkApiClient vk, final UserActor actor) {
 
+        def filteredMsgs = []
         msgFeedResponse[MsgFeedResponseFields.UPDATES].each {
             List item ->
                 if (item != null && item.size() > 0) {
@@ -91,31 +92,17 @@ final class VkHelperService {
                         String text = item[5]
                         text = text.trim()
 
-                        if (peerId == botAdminUserId) {
-                            if (text == "!ping") {
-                                StringBuilder sb = new StringBuilder()
-                                sb.append("pong!<br>")
-                                sb.append("pong!")
-
-                                def targetId = botAdminUserId
-                                sendTextMsg(vk, actor, targetId, targetId, sb.toString())
-                            }
-                        } else {
-                            if (peerId == allowPeerId) {
-                                if (text == "!ping") {
-                                    Map msgInfo = this.getMsgInfo(msgId, vk, actor)
-                                    if (msgInfo['user_id'] != actor.id && msgInfo['out'] != true) {
-                                        List<UserXtrCounters> userInfos = getUserInfo(vk, actor, msgInfo['user_id'] as String)
-                                        String userFirstName = userInfos[0].firstName
-                                        String sendingText = String.format("@id%s (%s) pong!", msgInfo['user_id'] as String, userFirstName)
-                                        sendChatTextMsg(vk, actor, peerId, sendingText)
-                                    }
-                                }
-                            }
+                        if (peerId == botAdminUserId || allowPeerIds.contains(peerId)) {
+                            filteredMsgs.add(['msgId' : msgId,
+                                              'peerId': peerId,
+                                              'date'  : date,
+                                              'test'  : text])
                         }
                     }
                 }
         }
+
+        filteredMsgs
     }
 
     @CompileStatic
