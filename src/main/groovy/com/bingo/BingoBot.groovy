@@ -1,8 +1,10 @@
 package com.bingo
 
-import com.bingo.service.ConfigValidator
+import com.bingo.component.PluginLoader
+import com.bingo.service.MsgFeedProcessorService
 import com.bingo.service.VkHelperService
 import com.bingo.utils.*
+import com.bingo.validator.ConfigValidator
 import com.vk.api.sdk.client.TransportClient
 import com.vk.api.sdk.client.VkApiClient
 import com.vk.api.sdk.client.actors.UserActor
@@ -23,6 +25,9 @@ class BingoBot {
     @Autowired
     private VkHelperService vkHelperService
 
+    @Autowired
+    private PluginLoader pluginLoader
+
     private static final TransportClient transportClient = HttpTransportClient.getInstance()
     private static final VkApiClient vk = new VkApiClient(transportClient)
 
@@ -30,6 +35,8 @@ class BingoBot {
 
     private AtomicReference<Date> currentStartDate = new AtomicReference<Date>()
     private AtomicReference<Integer> currentMsgFeedTS = new AtomicReference<Integer>()
+
+    private List<GeneralPluginHandler> plugins
 
     private Map longPollServerMap
     private int botAdminVkUserId
@@ -52,7 +59,22 @@ class BingoBot {
                 currentMsgFeedTS.compareAndSet(currentMsgFeedTS.get(), msgFeedResponse[MsgFeedResponseFields.TS])
                 longPollServerMap[LongPollServerMapFields.TS] = msgFeedResponse[MsgFeedResponseFields.TS]
 
-                vkHelperService.filterMsgFeed(Arrays.asList(2000000000 + allowVkChatId), botVkUserId, botAdminVkUserId, msgFeedResponse, vk, actor)
+                List<MsgFeedEntry> filteredFeed = vkHelperService.filterMsgFeed(Arrays.asList(2000000000 + allowVkChatId), botVkUserId, botAdminVkUserId, msgFeedResponse, vk, actor)
+
+                Map<String, List<MsgEntity>> msgEntitiesMap = MsgFeedProcessorService.tokenize(filteredFeed)
+                List<MsgResponseEntity> responses = []
+                plugins.each {
+                    responses.addAll(it.process(msgEntitiesMap))
+                }
+
+                responses.each {
+                    if (it.type == 1) {
+                        vkHelperService.sendTextMsg(vk, actor, it.peerId, it.peerId, it.text)
+                    }
+                    if (it.type == 2) {
+                        vkHelperService.sendChatTextMsg(vk, actor, it.peerId, it.text)
+                    }
+                }
             }
         } catch (Exception ex) {
             String date = DateUtils.getDateString("dd-MM-yyyy_HH_mm_ss")
@@ -88,6 +110,8 @@ class BingoBot {
             currentStartDate.set(DateUtils.getCurrentStartDate())
             longPollServerMap = vkHelperService.getPollServerMap(vk, actor)
             currentMsgFeedTS.set(Integer.valueOf(longPollServerMap[LongPollServerMapFields.TS]))
+
+            plugins = pluginLoader.loadClasses(".", "src.main.groovy.bingo")
 
         } else {
             log.error("config file not found!")

@@ -1,5 +1,6 @@
 package com.bingo.service
 
+import com.bingo.MsgFeedEntry
 import com.bingo.utils.LongPollServerMapFields
 import com.bingo.utils.MsgFeedResponseFields
 import com.vk.api.sdk.client.VkApiClient
@@ -74,7 +75,7 @@ final class VkHelperService {
     // example
     // [4,2105994,561,123456,1496404246,"hello",{"attach1_type":"photo","attach1":"123456_417336473","attach2_type":"audio","attach2":"123456_456239018","title":" ... "}]
     @CompileStatic
-    final public void filterMsgFeed(
+    final public List<MsgFeedEntry> filterMsgFeed(
             final List<Integer> allowPeerIds,
             final int botUserId,
             final int botAdminUserId,
@@ -93,10 +94,7 @@ final class VkHelperService {
                         text = text.trim()
 
                         if (peerId == botAdminUserId || allowPeerIds.contains(peerId)) {
-                            filteredMsgs.add(['msgId' : msgId,
-                                              'peerId': peerId,
-                                              'date'  : date,
-                                              'test'  : text])
+                            filteredMsgs.add(new MsgFeedEntry(msgId, peerId, date, text))
                         }
                     }
                 }

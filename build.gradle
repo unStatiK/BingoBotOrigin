@@ -25,6 +25,8 @@ repositories {
 }
 
 dependencies {
+    compile files('libs/bingoTypes-1.0.jar')
+
     compile 'org.codehaus.groovy:groovy-all:2.4.13'
     compile 'com.vk.api:sdk:0.5.11'
     compile group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.7'
