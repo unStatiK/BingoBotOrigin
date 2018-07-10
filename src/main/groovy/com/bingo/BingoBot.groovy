@@ -64,14 +64,19 @@ class BingoBot {
                 Map<String, List<MsgEntity>> msgEntitiesMap = MsgFeedProcessorService.tokenize(filteredFeed)
                 List<MsgResponseEntity> responses = []
                 plugins.each {
-                    responses.addAll(it.process(msgEntitiesMap))
+                    try {
+                        def handler = it.newInstance()
+                        responses.addAll(handler.process(msgEntitiesMap))
+                    } catch (Exception ex) {
+                        //skip...
+                    }
                 }
 
                 responses.each {
-                    if (it.type == 1) {
+                    if (it.type == MsgType.PRIVATE.type) {
                         vkHelperService.sendTextMsg(vk, actor, it.peerId, it.peerId, it.text)
                     }
-                    if (it.type == 2) {
+                    if (it.type == MsgType.CHAT.type) {
                         vkHelperService.sendChatTextMsg(vk, actor, it.peerId, it.text)
                     }
                 }
@@ -111,7 +116,7 @@ class BingoBot {
             longPollServerMap = vkHelperService.getPollServerMap(vk, actor)
             currentMsgFeedTS.set(Integer.valueOf(longPollServerMap[LongPollServerMapFields.TS]))
 
-            plugins = pluginLoader.loadClasses(".", "src.main.groovy.bingo")
+            plugins = pluginLoader.loadClasses(".", "com.bingo")
 
         } else {
             log.error("config file not found!")
