@@ -8,4 +8,12 @@ class MsgEntity {
         this.msgEntry = msgEntry
         this.version = version
     }
+
+    MsgFeedEntry getMsgEntry() {
+        return msgEntry
+    }
+
+    int getVersion() {
+        return version
+    }
 }
