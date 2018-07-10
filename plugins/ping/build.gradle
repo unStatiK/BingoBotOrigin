@@ -1,0 +1,16 @@
+group 'pingPlugin'
+version '1.0'
+
+apply plugin: 'groovy'
+
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile files('libs/bingoTypes-1.0.jar')
+    compile 'org.codehaus.groovy:groovy-all:2.4.13'
+}
