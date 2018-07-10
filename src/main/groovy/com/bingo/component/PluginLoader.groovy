@@ -3,46 +3,65 @@ package com.bingo.component
 import groovy.transform.CompileStatic
 import org.springframework.stereotype.Component
 
-import java.lang.reflect.Constructor
-import java.lang.reflect.InvocationTargetException
+import java.util.jar.JarEntry
+import java.util.jar.JarFile
 
 @CompileStatic
 @Component
 class PluginLoader {
-    public List<Class> loadClasses(String directory, String classpath) throws ClassNotFoundException {
+    public List<Class> loadClasses(String directory, String classpath) {
         List classes = []
         File pluginsDir = new File(directory)
         for (File jar : pluginsDir.listFiles()) {
-            try {
-                ClassLoader loader = URLClassLoader.newInstance(
-                        [jar.toURI().toURL()] as URL[],
-                        getClass().getClassLoader()
-                )
-                Class<?> clazz = Class.forName(classpath, true, loader)
-                // Apparently its bad to use Class.newInstance, so we use
-                // newClass.getConstructor() instead
-                Constructor constructor = clazz.getConstructor()
-                classes.add(constructor.newInstance())
+            ClassLoader loader = URLClassLoader.newInstance(
+                    [jar.toURI().toURL()] as URL[],
+                    getClass().getClassLoader()
+            )
 
-            } catch (ClassNotFoundException e) {
-                // There might be multiple JARs in the directory,
-                // so keep looking
-                continue;
-            } catch (MalformedURLException e) {
-                e.printStackTrace()
-            } catch (NoSuchMethodException e) {
-                e.printStackTrace()
-            } catch (InvocationTargetException e) {
-                e.printStackTrace()
-            } catch (IllegalAccessException e) {
-                e.printStackTrace()
-            } catch (InstantiationException e) {
-                e.printStackTrace()
-            }
-            return classes
+            classes.addAll(findClasses(jar, classpath))
         }
-
-//        throw new ClassNotFoundException("Class " + classpath
-//                + " wasn't found in directory " + directory)
+        return classes
     }
+
+    private static Class[] getClasses(String packageName)
+            throws ClassNotFoundException, IOException {
+        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        assert classLoader != null;
+        String path = packageName.replace('.', '/');
+        Enumeration<URL> resources = classLoader.getResources(path);
+        List<File> dirs = new ArrayList<File>();
+        while (resources.hasMoreElements()) {
+            URL resource = resources.nextElement();
+            dirs.add(new File(resource.getFile()));
+        }
+        ArrayList<Class> classes = new ArrayList<Class>();
+        for (File directory : dirs) {
+            classes.addAll(findClasses(directory, packageName));
+        }
+        return classes.toArray(new Class[classes.size()]);
+    }
+
+    private static List<Class> findClasses(File pluginFile, String packageName) throws ClassNotFoundException {
+        List<Class> foundedClasses = []
+        if (pluginFile.isFile() && pluginFile.getName().endsWith(".jar")) {
+            JarFile jarFile = new JarFile(pluginFile)
+            Enumeration<JarEntry> e = jarFile.entries()
+            URL[] urls = [pluginFile.toURI().toURL()] as URL[]
+            URLClassLoader cl = URLClassLoader.newInstance(urls)
+
+            while (e.hasMoreElements()) {
+                JarEntry je = e.nextElement()
+                if (je.isDirectory() || !je.getName().endsWith(".class")) {
+                    continue
+                }
+                // -6 because of .class
+                String className = je.getName().substring(0, je.getName().length() - 6)
+                className = className.replace('/', '.')
+                Class c = cl.loadClass(className)
+                foundedClasses << c
+            }
+        }
+        foundedClasses
+    }
+
 }
