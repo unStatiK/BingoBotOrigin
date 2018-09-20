@@ -23,24 +23,6 @@ class PluginLoader {
         return classes
     }
 
-    private static Class[] getClasses(String packageName)
-            throws ClassNotFoundException, IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
-        assert classLoader != null;
-        String path = packageName.replace('.', '/');
-        Enumeration<URL> resources = classLoader.getResources(path);
-        List<File> dirs = new ArrayList<File>();
-        while (resources.hasMoreElements()) {
-            URL resource = resources.nextElement();
-            dirs.add(new File(resource.getFile()));
-        }
-        ArrayList<Class> classes = new ArrayList<Class>();
-        for (File directory : dirs) {
-            classes.addAll(findClasses(directory, packageName));
-        }
-        return classes.toArray(new Class[classes.size()]);
-    }
-
     private static List<Class> findClasses(File pluginFile, String packageName) throws ClassNotFoundException {
         List<Class> foundedClasses = []
         if (pluginFile.isFile() && pluginFile.getName().endsWith(".jar")) {
@@ -51,7 +33,7 @@ class PluginLoader {
 
             while (e.hasMoreElements()) {
                 JarEntry je = e.nextElement()
-                if (je.isDirectory() || !je.getName().endsWith(".class")) {
+                if (je.isDirectory() || !je.getName().endsWith(".class") || je.getName().indexOf('$') != -1) {
                     continue
                 }
                 // -6 because of .class
