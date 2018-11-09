@@ -5,7 +5,7 @@ import groovy.transform.CompileStatic
 final class FilesUtils {
 
     @CompileStatic
-    final public static void CreateFolderIfNeeded(final String path) {
+    final static void CreateFolderIfNeeded(final String path) {
         def folderPath = new File(path)
         if (!folderPath.exists()) {
             folderPath.mkdir()
@@ -13,7 +13,7 @@ final class FilesUtils {
     }
 
     @CompileStatic
-    final public static void write(final String path, final String content) {
+    final static void write(final String path, final String content) {
         FileWriter fw = new FileWriter(path)
         BufferedWriter bw = new BufferedWriter(fw)
         bw.write(content)

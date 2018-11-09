@@ -9,7 +9,7 @@ import java.util.jar.JarFile
 @CompileStatic
 @Component
 class PluginLoader {
-    public List<Class> loadClasses(String directory, String classpath) {
+    List<Class> loadClasses(String directory, String classpath) {
         List classes = []
         File pluginsDir = new File(directory)
         for (File jar : pluginsDir.listFiles()) {

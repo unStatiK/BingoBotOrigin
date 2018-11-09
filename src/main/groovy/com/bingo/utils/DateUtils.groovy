@@ -8,12 +8,12 @@ import java.text.SimpleDateFormat
 final class DateUtils {
 
     @CompileStatic
-    final public static Date unixTimeToDate(final long unixTime) {
+    final static Date unixTimeToDate(final long unixTime) {
         return new Date(unixTime * 1000L)
     }
 
     @CompileStatic
-    final public static Date getCurrentStartDate() {
+    final static Date getCurrentStartDate() {
         def currentDate = new Date().toCalendar()
         return new GregorianCalendar(
                 currentDate.get(Calendar.YEAR),
@@ -22,7 +22,7 @@ final class DateUtils {
     }
 
     @CompileStatic
-    final public static String getDateString(final String pattern) {
+    final static String getDateString(final String pattern) {
         DateFormat dateFormat = new SimpleDateFormat(pattern)
         Date date = new Date()
         return dateFormat.format(date)

@@ -37,7 +37,7 @@ final class VkHelperService {
     private static final CloseableHttpClient httpClient = HttpClients.createDefault()
 
     @CompileStatic
-    final public Map getPollServerMap(final VkApiClient vk, final UserActor actor) {
+    final Map getPollServerMap(final VkApiClient vk, final UserActor actor) {
 
         LongpollParams response = vk.messages().getLongPollServer(actor)
                 .lpVersion(2)
@@ -52,7 +52,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public Map getUpdateMsgFeed(final Map longPollServerMap) {
+    final Map getUpdateMsgFeed(final Map longPollServerMap) {
         final HttpGet someHttpGet = new HttpGet("https://" + longPollServerMap[LongPollServerMapFields.SERVER])
 
         final URI uri = new URIBuilder(someHttpGet.getURI())
@@ -75,7 +75,7 @@ final class VkHelperService {
     // example
     // [4,2105994,561,123456,1496404246,"hello",{"attach1_type":"photo","attach1":"123456_417336473","attach2_type":"audio","attach2":"123456_456239018","title":" ... "}]
     @CompileStatic
-    final public List<MsgFeedEntry> filterMsgFeed(
+    final List<MsgFeedEntry> filterMsgFeed(
             final List<Integer> allowPeerIds,
             final int botUserId,
             final int botAdminUserId,
@@ -104,7 +104,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendTextMsg(
+    final void sendTextMsg(
             final VkApiClient vk, final UserActor actor, final int targetId, final int peerId, final String text) {
         vk.messages().send(actor)
                 .userId(targetId)
@@ -115,7 +115,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendChatTextMsg(
+    final void sendChatTextMsg(
             final VkApiClient vk, final UserActor actor, final int peerId, final String text) {
         vk.messages().send(actor)
                 .randomId(Integer.valueOf(RandomStringUtils.randomNumeric(5)))
@@ -126,7 +126,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendTextMsgWithForwardedMsgs(
+    final void sendTextMsgWithForwardedMsgs(
             final VkApiClient vk,
             final UserActor actor,
             final int targetId, final int peerId, final String text, final List<String> forwardedMsgIds) {
@@ -140,7 +140,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendChatTextMsgWithForwardedMsgs(
+    final void sendChatTextMsgWithForwardedMsgs(
             final VkApiClient vk,
             final UserActor actor, final int peerId, final String text, final List<String> forwardedMsgIds) {
         vk.messages().send(actor)
@@ -153,7 +153,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendTextMsgWithForwardedMsgsAndPhoto(
+    final void sendTextMsgWithForwardedMsgsAndPhoto(
             final VkApiClient vk,
             final UserActor actor,
             final int targetId,
@@ -169,7 +169,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendChatTextMsgWithForwardedMsgsAndPhoto(
+    final void sendChatTextMsgWithForwardedMsgsAndPhoto(
             final VkApiClient vk,
             final UserActor actor,
             final int peerId, final String text, final List<String> forwardedMsgIds, final List<Integer> photoIds) {
@@ -184,7 +184,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendTextMsgWithPhoto(
+    final void sendTextMsgWithPhoto(
             final VkApiClient vk,
             final UserActor actor,
             final int peerId, final String text, final List<Integer> photoIds) {
@@ -197,7 +197,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public void sendChatTextMsgWithPhoto(
+    final void sendChatTextMsgWithPhoto(
             final VkApiClient vk,
             final UserActor actor,
             final int peerId, final String text, final List<Integer> photoIds) {
@@ -211,7 +211,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public Map getMsgInfo(final int msgId, final VkApiClient vk, final UserActor actor) {
+    final Map getMsgInfo(final int msgId, final VkApiClient vk, final UserActor actor) {
         Map msgInfo = [:]
         GetByIdResponse response = vk.messages().getById(actor, msgId)
                 .previewLength(0)
@@ -226,7 +226,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public Photo uploadPhoto(final VkApiClient vk, final UserActor actor, final String photoPath) {
+    final Photo uploadPhoto(final VkApiClient vk, final UserActor actor, final String photoPath) {
         String serverUrl = getMessagesUploadServerUrl(vk, actor)
         File file = new File(photoPath)
         MultipartEntityBuilder mpEntity = MultipartEntityBuilder.create()
@@ -259,7 +259,7 @@ final class VkHelperService {
     }
 
     @CompileStatic
-    final public List<UserXtrCounters> getUserInfo(final VkApiClient vk, final UserActor actor, final String userIds) {
+    final List<UserXtrCounters> getUserInfo(final VkApiClient vk, final UserActor actor, final String userIds) {
         return vk.users().get(actor)
                 .userIds(userIds)
                 .fields(UserField.PHOTO_MAX_ORIG)

@@ -9,7 +9,7 @@ import org.springframework.util.StringUtils
 @CompileStatic
 class MsgFeedProcessorService {
 
-    public static Map<String, List<MsgEntity>> tokenize(final List<MsgFeedEntry> msgFeedEntryList) {
+    static Map<String, List<MsgEntity>> tokenize(final List<MsgFeedEntry> msgFeedEntryList) {
         Map<String, List<MsgEntity>> msgEntitiesMap = [:]
         msgFeedEntryList.each {
             def currentText = it.text

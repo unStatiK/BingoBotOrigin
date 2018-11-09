@@ -45,7 +45,7 @@ class BingoBot {
 
     // every 3sec
     @Scheduled(fixedRate = 3000L)
-    public void getMsgFeedUpdate() {
+    void getMsgFeedUpdate() {
         try {
             if (longPollServerMap != null) {
                 def msgFeedResponse = vkHelperService.getUpdateMsgFeed(longPollServerMap)
@@ -94,7 +94,7 @@ class BingoBot {
         }
     }
 
-    public void init(final String configPath) {
+    void init(final String configPath) {
 
         File propertiesFile = new File(configPath)
 
