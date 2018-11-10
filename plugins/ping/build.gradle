@@ -1,5 +1,5 @@
 group 'pingPlugin'
-version '1.0'
+version '2.0'
 
 apply plugin: 'groovy'
 
@@ -11,6 +11,7 @@ repositories {
 }
 
 dependencies {
-    compile files('libs/bingoTypes-1.0.jar')
+    compile files('libs/bingoTypes-2.0.jar')
+    compile 'com.vk.api:sdk:0.5.11'
     compile 'org.codehaus.groovy:groovy-all:2.4.13'
 }

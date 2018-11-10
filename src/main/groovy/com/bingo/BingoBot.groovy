@@ -1,12 +1,14 @@
 package com.bingo
 
 import com.bingo.component.PluginLoader
+import com.bingo.component.ShareableStorage
 import com.bingo.service.MsgFeedProcessorService
 import com.bingo.service.VkHelperService
 import com.bingo.utils.*
 import com.bingo.validator.ConfigValidator
 import com.vk.api.sdk.client.TransportClient
 import com.vk.api.sdk.client.VkApiClient
+import com.vk.api.sdk.client.actors.Actor
 import com.vk.api.sdk.client.actors.UserActor
 import com.vk.api.sdk.httpclient.HttpTransportClient
 import org.slf4j.Logger
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
+import org.springframework.util.StringUtils
 
 import java.util.concurrent.atomic.AtomicReference
 
@@ -28,10 +31,13 @@ class BingoBot {
     @Autowired
     private PluginLoader pluginLoader
 
+    @Autowired
+    private ShareableStorage shareableStorage
+
     private static final TransportClient transportClient = HttpTransportClient.getInstance()
     private static final VkApiClient vk = new VkApiClient(transportClient)
 
-    private static UserActor actor
+    private static Actor actor
 
     private AtomicReference<Date> currentStartDate = new AtomicReference<Date>()
     private AtomicReference<Integer> currentMsgFeedTS = new AtomicReference<Integer>()
@@ -63,10 +69,12 @@ class BingoBot {
 
                 Map<String, List<MsgEntity>> msgEntitiesMap = MsgFeedProcessorService.tokenize(filteredFeed)
                 List<MsgResponseEntity> responses = []
+
+                //main loop for plugins interop
                 plugins.each {
                     try {
                         def handler = it.newInstance()
-                        responses.addAll(handler.process(msgEntitiesMap))
+                        responses.addAll(handler.process(msgEntitiesMap, shareableStorage.getBingoApiInteropMap(handler)))
                     } catch (Exception ex) {
                         //skip...
                     }
@@ -115,6 +123,19 @@ class BingoBot {
             currentStartDate.set(DateUtils.getCurrentStartDate())
             longPollServerMap = vkHelperService.getPollServerMap(vk, actor)
             currentMsgFeedTS.set(Integer.valueOf(longPollServerMap[LongPollServerMapFields.TS]))
+
+            def allowHandlersListFile = new File(botConfigProps[ConfigFields.ALLOW_HANDLERS_LIST_PATH])
+            if (allowHandlersListFile.exists()) {
+                allowHandlersListFile.readLines().each {
+                    line ->
+                        if (!StringUtils.isEmpty(line)) {
+                            shareableStorage.allowHandler(line.trim())
+                        }
+                }
+            }
+
+            shareableStorage.share(vk, BingoApiConstants.APP_VK_CLIENT_OBJECT_ID)
+            shareableStorage.share(actor, BingoApiConstants.APP_ACTOR_OBJECT_ID)
 
             plugins = pluginLoader.loadClasses(".", "com.bingo")
 
