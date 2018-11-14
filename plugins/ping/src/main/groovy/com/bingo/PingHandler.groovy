@@ -4,7 +4,7 @@ import com.vk.api.sdk.client.VkApiClient
 import com.vk.api.sdk.client.actors.UserActor
 import com.vk.api.sdk.objects.messages.responses.GetByIdResponse
 
-public class PingHandler implements GeneralPluginHandler {
+class PingHandler implements GeneralPluginHandler {
 
     private static final String handlerName = 'simple_ping'
     private static final String handlerCommandKey = '!ping'
