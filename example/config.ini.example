@@ -2,4 +2,5 @@ BOT_VK_USER_ID = 1
 BOT_VK_USER_ACCESS_TOKEN = abcdef
 BOT_ADMIN_VK_USER_ID = 1
 ALLOW_VK_CHAT_ID = 1
-ALLOW_HANDLERS_LIST_PATH = './example/allow_handlers.txt'
+ALLOW_HANDLERS_LIST_PATH = ./example/allow_handlers.txt
+PLUGINS_DIR = ./plugins_bin

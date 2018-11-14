@@ -13,5 +13,6 @@ final class ConfigValidator {
         assert !StringUtils.isEmpty(configProps[ConfigFields.BOT_ADMIN_VK_USER_ID]): "config field ${ConfigFields.BOT_ADMIN_VK_USER_ID} should be not empty"
         assert !StringUtils.isEmpty(configProps[ConfigFields.ALLOW_VK_CHAT_ID]): "config field ${ConfigFields.ALLOW_VK_CHAT_ID} should be not empty"
         assert !StringUtils.isEmpty(configProps[ConfigFields.ALLOW_HANDLERS_LIST_PATH]): "config field ${ConfigFields.ALLOW_HANDLERS_LIST_PATH} should be not empty"
+        assert !StringUtils.isEmpty(configProps[ConfigFields.PLUGINS_DIR]): "config field ${ConfigFields.PLUGINS_DIR} should be not empty"
     }
 }

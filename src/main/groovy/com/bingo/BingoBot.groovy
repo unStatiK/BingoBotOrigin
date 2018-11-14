@@ -72,12 +72,12 @@ class BingoBot {
 
                 //main loop for plugins interop
                 plugins.each {
-                    try {
-                        def handler = it.newInstance()
-                        responses.addAll(handler.process(msgEntitiesMap, shareableStorage.getBingoApiInteropMap(handler)))
-                    } catch (Exception ex) {
-                        //skip...
-                    }
+                    handler ->
+                        try {
+                            responses.addAll(handler.process(msgEntitiesMap, shareableStorage.getBingoApiInteropMap(handler)))
+                        } catch (Exception ex) {
+                            //skip...
+                        }
                 }
 
                 responses.each {
@@ -137,7 +137,14 @@ class BingoBot {
             shareableStorage.share(vk, BingoApiConstants.APP_VK_CLIENT_OBJECT_ID)
             shareableStorage.share(actor, BingoApiConstants.APP_ACTOR_OBJECT_ID)
 
-            plugins = pluginLoader.loadClasses(".", "com.bingo")
+            def pluginsDir = botConfigProps[ConfigFields.PLUGINS_DIR]
+            if (!StringUtils.isEmpty(pluginsDir)) {
+                plugins = []
+                pluginLoader.loadClasses(pluginsDir, "com.bingo").each {
+                    plugins << it.newInstance()
+                }
+            }
+
 
         } else {
             log.error("config file not found!")
